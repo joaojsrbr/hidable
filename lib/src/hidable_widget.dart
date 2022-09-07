@@ -1,0 +1,76 @@
+import 'package:flutter/material.dart';
+import 'hidable_controller_ext.dart';
+
+/// ### Widget that can make anything hidable.
+///
+/// Wrap your static located widget with [Hidable],
+/// then your widget will support scroll to hide/show feature.
+///
+/// Note: scroll controller that you give to [Hidable], also must be given to your scrollable widget,
+/// It could, [ListView], [GridView], etc.
+///
+/// #### For more information refer to - [documentation](https://github.com/anonistas/hidable#readme)
+class Hidable extends StatelessWidget with PreferredSizeWidget {
+  /// Child widget, which you want to add scroll-to-hide effect to it.
+  ///
+  /// It should be static located widget:
+  /// [BottomNavigationBar], [FloatingActionButton], [AppBar] etc.
+  final Widget child;
+
+  /// The main scroll controller to listen user's scrolls.
+  ///
+  /// It must be given to your scrollable widget.
+  final List<ScrollController> controllers;
+
+  /// Enable/Disable opacity animation. As default it's enabled (true).
+  final bool wOpacity;
+
+  /// A customization field for [Hidable]'s `preferredSize`.
+  ///
+  /// As default the preferred size is is the [AppBar]'s `preferredSize`.
+  /// (56 heights with page-size width).
+  final Size preferredWidgetSize;
+
+  const Hidable({
+    Key? key,
+    required this.child,
+    required this.controllers,
+    this.wOpacity = true,
+    this.preferredWidgetSize = const Size.fromHeight(56),
+  }) : super(key: key);
+
+  @override
+  Size get preferredSize => preferredWidgetSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final hidable = controllers.hidable(preferredWidgetSize.height);
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: hidable.stickinessNotifier,
+      builder: (_, isStickinessEnabled, __) {
+        // If stickiness of hidable was enabled, return card with one factor.
+        // So, that hidable's movement would be disabled.
+        if (isStickinessEnabled) return hidableCard(1.0, hidable);
+
+        return ValueListenableBuilder<double>(
+          valueListenable: hidable.sizeNotifier,
+          builder: (_, height, __) => hidableCard(height, hidable),
+        );
+      },
+    );
+  }
+
+  // Custom alignment wrapper card of hidable.
+  // Returns whole card at given factor.
+  Widget hidableCard(double factor, hidable) {
+    return Align(
+      heightFactor: factor,
+      alignment: const Alignment(0, -1),
+      child: SizedBox(
+        height: hidable.size,
+        child: wOpacity ? Opacity(opacity: factor, child: child) : child,
+      ),
+    );
+  }
+}
