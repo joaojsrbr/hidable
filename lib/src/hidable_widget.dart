@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'hidable_controller_ext.dart';
 
-class Hidable extends StatefulWidget with PreferredSizeWidget {
+class Hidable extends StatelessWidget with PreferredSizeWidget {
   final Widget child;
 
   final List<ScrollController> controllers;
@@ -19,18 +19,11 @@ class Hidable extends StatefulWidget with PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  State<Hidable> createState() => _HidableState();
-
-  @override
   Size get preferredSize => preferredWidgetSize;
-}
 
-class _HidableState extends State<Hidable> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    final hidable =
-        widget.controllers.hidable(widget.preferredWidgetSize.height);
+    final hidable = controllers.hidable(preferredWidgetSize.height);
 
     return ValueListenableBuilder<bool>(
       valueListenable: hidable.stickinessNotifier,
@@ -50,14 +43,10 @@ class _HidableState extends State<Hidable> with AutomaticKeepAliveClientMixin {
       heightFactor: factor,
       alignment: const Alignment(0, -1),
       child: SizedBox(
+        key: ObjectKey(factor),
         height: hidable.size,
-        child: widget.wOpacity
-            ? Opacity(opacity: factor, child: widget.child)
-            : widget.child,
+        child: wOpacity ? Opacity(opacity: factor, child: child) : child,
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
