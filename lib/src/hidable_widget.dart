@@ -43,7 +43,6 @@ class Hidable extends StatelessWidget with PreferredSizeWidget {
       heightFactor: factor,
       alignment: const Alignment(0, -1),
       child: SizedBox(
-        key: ObjectKey(factor),
         height: hidable.size,
         child: wOpacity ? Opacity(opacity: factor, child: child) : child,
       ),
